@@ -2,7 +2,7 @@ import time
 import random
 
 
-fridge = {
+products = {
     'frozen fish': 2,
     'avokado': 0,
     'smoked fish': 1,
@@ -15,7 +15,7 @@ fridge = {
     'smetana': 10
 }
 my_time = 10
-plate = {}
+
 
 portions = {
     'parsley': 1,
@@ -30,46 +30,50 @@ portions = {
 }
 
 
-def check_availability(fridge, person_quantity):
-    breakfest_items = {}
-    if 'frozen fish' in fridge.keys() and fridge['frozen fish'] >= portions['frozen fish'] * person_quantity:
-        breakfest_items['frozen fish'] = fridge['frozen fish']
-    if 'smoked fish' in fridge.keys() and fridge['smoked fish'] >= portions['smoked fish'] * person_quantity:
-        breakfest_items['smoked fish'] = fridge['smoked fish']
-    if 'avokado' in fridge.keys() and fridge['avokado'] >= portions['avokado'] * person_quantity:
-        breakfest_items['avokado'] = fridge['avokado']
-    if 'dill' in fridge.keys() and fridge['dill'] >= portions['dill'] * person_quantity:
-        breakfest_items['dill'] = fridge['dill']
-    if 'parsley' in fridge.keys() and fridge['parsley'] >= portions['parsley'] * person_quantity:
-        breakfest_items['parsley'] = fridge['parsley']
-    if 'egg' in fridge.keys() and fridge['egg'] >= portions['egg'] * person_quantity:
-        breakfest_items['egg'] = fridge['egg']
-    if 'salad mix' in fridge.keys() and fridge['salad mix'] >= portions['salad mix'] * person_quantity:
-        breakfest_items['salad mix'] = fridge['salad mix']
-    return breakfest_items
+# Breakfest options
+steam_fried_fish = {
+    'frozen fish': 1,
+    'avokado': 0.5,
+    'salad mix': 1
+}
+
+smoked_fish = {
+    'smoked fish': 1,
+    'grecha': 150,
+    'smetana': 0.5,
+    'avokado': 0.5
+
+}
+
+plate = {}
+# breakfast_type = random.choice([steam_fried_fish, smoked_fish])
+breakfast = steam_fried_fish
 
 
-def breakfest_types(person_quantity):
-    breakfest_options = []
-    breakfest_products = check_availability(fridge, person_quantity)
-    if 'frozen fish' and 'avokado' in breakfest_products.keys() or ('salad mix' or ('dill' and 'pasley')) in breakfest_products.keys():
-        breakfest_options.append('make_steam_fish')
-        breakfest_options.append('make_fried_fish')
-    if 'smoked fish' in breakfest_products.keys() and ('make_steam_fish' or 'make_fried_fish') in breakfest_options and ('smetana' or 'coconut milk') in breakfest_products and grecha_prepared():
-        breakfest_options.append('smoked fish')
-        breakfest_options.append('make_waffles')
-    return breakfest_options
+def check_availability(person_quantity, breakfast_type):
+    for product, amount in breakfast_type.items():
+        if product in products.keys() and products[product] >= portions[product] * person_quantity:
+            breakfast_items = breakfast_type
+        if (product == 'salad mix' or product == 'avokado') and products[product] < portions[product] * person_quantity:
+            print('avokado test')
+            breakfast_items.pop(product)
+            breakfast_items['dill'] = 1
+            breakfast_items['parsley'] = 1
+            return breakfast_items
 
 
-def select_breakfest(person_quantity):
-    return breakfest_types(person_quantity)[0]
+def make_breakfest(person_quantity, breakfest_type):
+    breakfest_products = check_availability(person_quantity, breakfest_type)
+    if 'frozen fish' in breakfest_products.keys():
+        make_steam_fish(person_quantity, breakfest_products)
+    # may be fried fish
 
+def products_plate_update(product, person_quantity):
+    plate[product] = portions[product]
+    products[product] -= portions[product] * person_quantity
 
-def make_breakfest(person_quantity):
-    breakfest_option = select_breakfest(person_quantity)
-    print(breakfest_option)
-
-def make_steam_fish(person_quantity):
+def make_steam_fish(person_quantity, fish_recipe):
+    print('Make steam fish.')
     print(f'Put {person_quantity} portion/portions of fish into the pot.')
     for i in range(1,41):
         # if i < 41:
@@ -77,34 +81,38 @@ def make_steam_fish(person_quantity):
         #     time.sleep(0.5)
         if i == 40:
             print(f'Fish is ready. Add {person_quantity} portion/portions of steam fish to the plate.')
-            update_plate(person_quantity, 'fish', portions['frozen fish'])
-    avokado_and_salad(person_quantity)
-    if plate['avokado']:
-        pass
-    if fridge['egg']:
-        make_eggs(person_quantity)
+            for product in fish_recipe.keys():
+                products_plate_update(product, person_quantity)
 
+print(f'Products before: {products}')
+make_breakfest(2, breakfast)
+print(f'Plate: {plate}')
+print(f'Products after: {products}')
 
-def make_fried_fish(person_quantity):
-    print(f'Put {person_quantity} portion/portions of fish on the pan.')
-    for i in range(1, 16):
-        # if i < 16:
-        #     print(i)#, end="\r")
-        #     time.sleep(0.5)
-        if i == 15:
-            print(f'Fish is ready. Add {person_quantity} portion/portions of fried fish to the plate')
-            update_plate(person_quantity, 'fish', portions['frozen fish'])
-    avokado_and_salad(person_quantity)
+    # if fridge['egg']:
+    #     make_eggs(person_quantity)
 
-
-def make_fish(time_stamp, person_quantity):
-    my_time = 10
-    if time_stamp < my_time:
-        make_steam_fish(person_quantity)
-    else:
-        make_fried_fish(person_quantity)
-
-make_breakfest(2)
+#
+# def make_fried_fish(person_quantity):
+#     print(f'Put {person_quantity} portion/portions of fish on the pan.')
+#     for i in range(1, 16):
+#         # if i < 16:
+#         #     print(i)#, end="\r")
+#         #     time.sleep(0.5)
+#         if i == 15:
+#             print(f'Fish is ready. Add {person_quantity} portion/portions of fried fish to the plate')
+#             update_plate(person_quantity, 'fish', portions['frozen fish'])
+#     avokado_and_salad(person_quantity)
+#
+#
+# def make_fish(time_stamp, person_quantity):
+#     my_time = 10
+#     if time_stamp < my_time:
+#         make_steam_fish(person_quantity)
+#     else:
+#         make_fried_fish(person_quantity)
+#
+# make_breakfest(2)
 
 # def check_update_availability(person_quantity, product, product_portion):
 #     if product in fridge.keys() and fridge[product] >= product_portion * person_quantity:
